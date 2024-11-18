@@ -7,11 +7,11 @@ using UnityEngine.Rendering.Universal;
 /// <summary>
 /// 画面に波紋を表示するポストエフェクトパス
 /// </summary>
-public class WaveEffectRenderPass : ScriptableRenderPass
+public class WavePostEffectRenderPass : ScriptableRenderPass
 {
     private Material _material;
 
-    public WaveEffectRenderPass(Material material)
+    public WavePostEffectRenderPass(Material material)
     {
         _material = material;
     }
@@ -106,15 +106,15 @@ public class WaveEffectRenderPass : ScriptableRenderPass
     }
 }
 
-public class WaveEffectRendererFeature : ScriptableRendererFeature
+public class WavePostEffectRendererFeature : ScriptableRendererFeature
 {
     [SerializeField] private Material _material;
     
-    private WaveEffectRenderPass _pass;
+    private WavePostEffectRenderPass _pass;
 
     public override void Create()
     {
-        _pass = new WaveEffectRenderPass(_material)
+        _pass = new WavePostEffectRenderPass(_material)
         {
             renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing
         };
