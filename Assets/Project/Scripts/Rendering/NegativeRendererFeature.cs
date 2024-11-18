@@ -6,27 +6,32 @@ using UnityEngine.Rendering.Universal;
 
 public class NegativeRenderPass : ScriptableRenderPass
 {
-    private const string ShaderPath = "Hidden/Sample/Negative";
+    // private const string ShaderPath = "Hidden/Sample/Negative";
     private Material _material;
 
-    private Material Material
-    {
-        get
-        {
-            if (_material == null)
-            {
-                _material = CoreUtils.CreateEngineMaterial(ShaderPath);
-            }
+    // private Material Material
+    // {
+    //     get
+    //     {
+    //         if (_material == null)
+    //         {
+    //             _material = CoreUtils.CreateEngineMaterial(ShaderPath);
+    //         }
+    //
+    //         return _material;
+    //     }
+    // }
 
-            return _material;
-        }
+    public NegativeRenderPass(Material material)
+    {
+        _material = material;
     }
 
     public void Cleanup()
     {
         // ランタイム時生成したMaterialは手動で破棄する必要がある
         // これを忘れるとメモリリークが発生する
-        CoreUtils.Destroy(_material);
+        // CoreUtils.Destroy(_material);
     }
 
     private class PassData
@@ -62,7 +67,7 @@ public class NegativeRenderPass : ScriptableRenderPass
         using (var builder = renderGraph.AddRasterRenderPass<PassData>("NegativeRenderPass", out var passData))
         {
             // passDataに必要なデータを入れる
-            passData.Material = Material;
+            passData.Material = _material;
             passData.SourceTexture = sourceTextureHandle;
 
             // 解説 *6
@@ -94,11 +99,13 @@ public class NegativeRenderPass : ScriptableRenderPass
 
 public class NegativeRendererFeature : ScriptableRendererFeature
 {
+    [SerializeField] private Material _material;
+    
     private NegativeRenderPass _pass;
 
     public override void Create()
     {
-        _pass = new NegativeRenderPass
+        _pass = new NegativeRenderPass(_material)
         {
             renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing
         };

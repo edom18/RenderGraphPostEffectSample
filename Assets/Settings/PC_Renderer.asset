@@ -66,6 +66,7 @@ MonoBehaviour:
   m_Name: NegativeRendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
+  _material: {fileID: 2100000, guid: 54d3542195d7a49269210b3235b8a4c6, type: 2}
 --- !u!114 &7833122117494664109
 MonoBehaviour:
   m_ObjectHideFlags: 0
