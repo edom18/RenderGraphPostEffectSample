@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,12 +8,17 @@ public class WaveEffectController : MonoBehaviour
     [SerializeField] private Material _material;
     [SerializeField] private Button _playButton;
     [SerializeField] private Button _stopButton;
-    
+
     [SerializeField] private ParameterSlider _waveSlider;
     [SerializeField] private ParameterSlider _speedSlider;
     [SerializeField] private ParameterSlider _intensitySlider;
     [SerializeField] private ParameterSlider _offsetXSlider;
     [SerializeField] private ParameterSlider _offsetYSlider;
+
+    [SerializeField] private Button _openCloseButton;
+
+    [SerializeField] private GameObject _configView;
+    [SerializeField] private TMP_Text _configButtonText;
 
     private static readonly int s_needsEffectId = Shader.PropertyToID("_NeedsEffect");
     private static readonly int s_intensityId = Shader.PropertyToID("_Intensity");
@@ -26,6 +32,8 @@ public class WaveEffectController : MonoBehaviour
 
         _playButton.onClick.AddListener(HandlePlayButtonClicked);
         _stopButton.onClick.AddListener(HandleStopButtonClicked);
+
+        _openCloseButton.onClick.AddListener(HandleOpenCloseClicked);
 
         _waveSlider.Value = _material.GetFloat(s_waveId);
         _speedSlider.Value = _material.GetFloat(s_speedId);
@@ -59,7 +67,7 @@ public class WaveEffectController : MonoBehaviour
     {
         _material.SetFloat(s_waveId, value);
     }
-    
+
     private void SetSpeed(float value)
     {
         _material.SetFloat(s_speedId, value);
@@ -83,6 +91,20 @@ public class WaveEffectController : MonoBehaviour
     private void HandleStopButtonClicked()
     {
         Stop();
+    }
+
+    private void HandleOpenCloseClicked()
+    {
+        if (_configView.activeSelf)
+        {
+            _configView.SetActive(false);
+            _configButtonText.text = "|>";
+        }
+        else
+        {
+            _configView.SetActive(true);
+            _configButtonText.text = "▼";
+        }
     }
 
     private void HandleWaveValueChanged(float value)
