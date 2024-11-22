@@ -9,11 +9,31 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class WavePostEffectRenderPass : ScriptableRenderPass
 {
+    private static readonly string s_shaderName = "Hidden/WavePostEffectShader";
+    
     private Material _material;
+    private static readonly int s_needsEffectId = Shader.PropertyToID("_NeedsEffect");
+    private static readonly int s_waveId = Shader.PropertyToID("_Wave");
+    private static readonly int s_speedId = Shader.PropertyToID("_Speed");
+    private static readonly int s_intensityId = Shader.PropertyToID("_Intensity");
+    private static readonly int s_offsetId = Shader.PropertyToID("_Offset");
 
-    public WavePostEffectRenderPass(Material material)
+    private Material Material
     {
-        _material = material;
+        get
+        {
+            if (_material == null)
+            {
+                _material = CoreUtils.CreateEngineMaterial(s_shaderName);
+            }
+
+            return _material;
+        }
+    }
+
+    public void Cleanup()
+    {
+        CoreUtils.Destroy(_material);
     }
 
     /// <summary>
@@ -23,6 +43,16 @@ public class WavePostEffectRenderPass : ScriptableRenderPass
     {
         public Material Material;
         public TextureHandle SourceTexture;
+    }
+
+    private void UpdateSettings()
+    {
+        WaveVolumeComponent volume = VolumeManager.instance.stack.GetComponent<WaveVolumeComponent>();
+        Material.SetFloat(s_waveId, volume.Wave.value);
+        Material.SetFloat(s_intensityId, volume.Intensity.value);
+        Material.SetFloat(s_speedId, volume.Speed.value);
+        Material.SetVector(s_offsetId, volume.Offset.value);
+        Material.SetInt(s_needsEffectId, volume.NeedsEffect.value);
     }
 
     /// <summary>
@@ -73,9 +103,11 @@ public class WavePostEffectRenderPass : ScriptableRenderPass
 
         // 波紋エフェクトの RasterRenderPass を作成
         
+        UpdateSettings();
+        
         using (IRasterRenderGraphBuilder builder = renderGraph.AddRasterRenderPass("WavePostEffectRenderPass", out PassData passData))
         {
-            passData.Material = _material;
+            passData.Material = Material;
             passData.SourceTexture = sourceTextureHandle;
 
             // builder を通して RenderGraphPass に対して各種設定を行う
@@ -108,13 +140,11 @@ public class WavePostEffectRenderPass : ScriptableRenderPass
 
 public class WavePostEffectRendererFeature : ScriptableRendererFeature
 {
-    [SerializeField] private Material _material;
-    
     private WavePostEffectRenderPass _pass;
 
     public override void Create()
     {
-        _pass = new WavePostEffectRenderPass(_material)
+        _pass = new WavePostEffectRenderPass()
         {
             renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing
         };
@@ -129,8 +159,7 @@ public class WavePostEffectRendererFeature : ScriptableRendererFeature
     {
         if (disposing)
         {
-            // ランタイムでマテリアルを生成したりした場合はここで破棄する
-            // e.g) _pass.Cleanup();
+            _pass.Cleanup();
         }
     }
 }
