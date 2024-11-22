@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -24,11 +25,8 @@ public class WaveEffectController : MonoBehaviour
     {
         get
         {
-            if (!VolumeManager.instance.isInitialized)
-            {
-                VolumeManager.instance.Initialize(null, _localProfile);
-            }
-            return VolumeManager.instance.stack.GetComponent<WaveVolumeComponent>();
+            _localProfile.TryGet(out WaveVolumeComponent component);
+            return component;
         }
     }
 
