@@ -10,7 +10,7 @@ using UnityEngine.Rendering.Universal;
 public class WavePostEffectRenderPass : ScriptableRenderPass
 {
     private static readonly string s_shaderName = "Hidden/WavePostEffectShader";
-    
+
     private Material _material;
     private static readonly int s_needsEffectId = Shader.PropertyToID("_NeedsEffect");
     private static readonly int s_waveId = Shader.PropertyToID("_Wave");
@@ -63,7 +63,7 @@ public class WavePostEffectRenderPass : ScriptableRenderPass
     public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
     {
         // コンテナから必要なリソースを取得する
-        
+
         UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
 
         // 入力とするテクスチャ（エフェクト対象）を resourceData から取得
@@ -79,32 +79,32 @@ public class WavePostEffectRenderPass : ScriptableRenderPass
         //     - 申請されたリソースは描画段階に入ってから確保される。言い換えると、描画段階前にはリソースにアクセスすることができない
         //     - 申請されたリソースは描画処理に使われる分だけ確保される（無駄な確保を防げる）
         //     - 手動でリソース解放する必要がない
-        
+
         TextureHandle sourceTextureHandle = resourceData.activeColorTexture;
 
         // 入力テクスチャの情報を元に、出力用のテクスチャの Descriptor を作成
-        
+
         TextureDesc descriptor = renderGraph.GetTextureDesc(sourceTextureHandle);
-        
+
         // テクスチャの名前
-        
+
         descriptor.name = "WavePostEffectTexture";
         descriptor.clearBuffer = false;
         descriptor.msaaSamples = MSAASamples.None;
-        
+
         // ポストエフェクトの場合は深度バッファは不要なので Bit を 0 に
-        
+
         descriptor.depthBufferBits = 0;
 
         // 新規テクスチャリソースの「申請」
         // 申請のため、この時点ではまだリソースは確保されていない
-        
+
         TextureHandle wavePostEffectTextureHandle = renderGraph.CreateTexture(descriptor);
 
         // 波紋エフェクトの RasterRenderPass を作成
-        
+
         UpdateSettings();
-        
+
         using (IRasterRenderGraphBuilder builder = renderGraph.AddRasterRenderPass("WavePostEffectRenderPass", out PassData passData))
         {
             passData.Material = Material;
@@ -113,23 +113,23 @@ public class WavePostEffectRenderPass : ScriptableRenderPass
             // builder を通して RenderGraphPass に対して各種設定を行う
             // なお、描画ターゲットや他使用されるテクスチャは必ずこの段階で設定する必要がある
             // いわゆるビルダーパターン
-            
+
             // 描画ターゲットに出力用のテクスチャを設定
-            
+
             builder.SetRenderAttachment(wavePostEffectTextureHandle, 0, AccessFlags.Write);
-            
+
             // 入力テクスチャの使用を宣言する
-            
+
             builder.UseTexture(sourceTextureHandle, AccessFlags.Read);
 
             // 実際の描画関数を設定する( static 関数が推奨されてるよう)
-            
+
             builder.SetRenderFunc(static (PassData data, RasterGraphContext context) =>
             {
                 RasterCommandBuffer cmd = context.cmd;
                 Material material = data.Material;
                 TextureHandle source = data.SourceTexture;
-                
+
                 Blitter.BlitTexture(cmd, source, Vector2.one, material, 0);
             });
         }
@@ -152,7 +152,10 @@ public class WavePostEffectRendererFeature : ScriptableRendererFeature
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        renderer.EnqueuePass(_pass);
+        if (renderingData.cameraData.cameraType == CameraType.Game)
+        {
+            renderer.EnqueuePass(_pass);
+        }
     }
 
     protected override void Dispose(bool disposing)
