@@ -1,11 +1,10 @@
-using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class WaveEffectController : MonoBehaviour
 {
-    [SerializeField] private Material _material;
     [SerializeField] private Button _playButton;
     [SerializeField] private Button _stopButton;
 
@@ -19,12 +18,19 @@ public class WaveEffectController : MonoBehaviour
 
     [SerializeField] private GameObject _configView;
     [SerializeField] private TMP_Text _configButtonText;
+    [SerializeField] private VolumeProfile _localProfile;
 
-    private static readonly int s_needsEffectId = Shader.PropertyToID("_NeedsEffect");
-    private static readonly int s_intensityId = Shader.PropertyToID("_Intensity");
-    private static readonly int s_offsetId = Shader.PropertyToID("_Offset");
-    private static readonly int s_waveId = Shader.PropertyToID("_Wave");
-    private static readonly int s_speedId = Shader.PropertyToID("_Speed");
+    private WaveVolumeComponent Volume
+    {
+        get
+        {
+            if (!VolumeManager.instance.isInitialized)
+            {
+                VolumeManager.instance.Initialize(null, _localProfile);
+            }
+            return VolumeManager.instance.stack.GetComponent<WaveVolumeComponent>();
+        }
+    }
 
     private void Awake()
     {
@@ -32,14 +38,13 @@ public class WaveEffectController : MonoBehaviour
 
         _playButton.onClick.AddListener(HandlePlayButtonClicked);
         _stopButton.onClick.AddListener(HandleStopButtonClicked);
-
         _openCloseButton.onClick.AddListener(HandleOpenCloseClicked);
 
-        _waveSlider.Value = _material.GetFloat(s_waveId);
-        _speedSlider.Value = _material.GetFloat(s_speedId);
-        _intensitySlider.Value = _material.GetFloat(s_intensityId);
-        _offsetXSlider.Value = _material.GetVector(s_offsetId).x;
-        _offsetYSlider.Value = _material.GetVector(s_offsetId).y;
+        _waveSlider.Value = Volume.Wave.value;
+        _speedSlider.Value = Volume.Speed.value;
+        _intensitySlider.Value = Volume.Intensity.value;
+        _offsetXSlider.Value = Volume.Offset.value.x;
+        _offsetYSlider.Value = Volume.Offset.value.y;
 
         _waveSlider.OnValueChanged += HandleWaveValueChanged;
         _speedSlider.OnValueChanged += HandleSpeedValueChanged;
@@ -55,32 +60,32 @@ public class WaveEffectController : MonoBehaviour
 
     private void Play()
     {
-        _material.SetInt(s_needsEffectId, 1);
+        Volume.NeedsEffect.value = 1;
     }
 
     private void Stop()
     {
-        _material.SetInt(s_needsEffectId, 0);
+        Volume.NeedsEffect.value = 0;
     }
 
     private void SetWave(float value)
     {
-        _material.SetFloat(s_waveId, value);
+        Volume.Wave.value = value;
     }
 
     private void SetSpeed(float value)
     {
-        _material.SetFloat(s_speedId, value);
+        Volume.Speed.value = value;
     }
 
     private void SetIntensity(float value)
     {
-        _material.SetFloat(s_intensityId, value);
+        Volume.Intensity.value = value;
     }
 
     private void SetOffset(Vector2 offset)
     {
-        _material.SetVector(s_offsetId, offset);
+        Volume.Offset.value = offset;
     }
 
     private void HandlePlayButtonClicked()

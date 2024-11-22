@@ -3312,7 +3312,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: 08c21631781ea4f3cad3c60c8afa6a0c, type: 2}
+  sharedProfile: {fileID: 11400000, guid: f463080b270d9bf46b229e0311dedc40, type: 2}
 --- !u!4 &1334618989
 Transform:
   m_ObjectHideFlags: 0
@@ -5123,7 +5123,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2130d6996e7b3439b85e2bf402083e6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _material: {fileID: 2100000, guid: 54d3542195d7a49269210b3235b8a4c6, type: 2}
   _playButton: {fileID: 960012432}
   _stopButton: {fileID: 90586456}
   _waveSlider: {fileID: 620708507}
